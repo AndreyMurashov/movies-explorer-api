@@ -11,19 +11,19 @@ const movieSchema = new mongoose.Schema({
     required: true,
   },
   duration: {
-    type: Number ,
+    type: Number,
     required: true,
   },
   year: {
-    type: String ,
+    type: String,
     required: true,
   },
   description: {
-    type: String ,
+    type: String,
     required: true,
   },
   image: {
-    type: String ,
+    type: String,
     required: true,
     validate: {
       validator: (value) => validator.isURL(value, { protocols: ['http', 'https'], require_tld: true, require_protocol: true }),
@@ -31,7 +31,7 @@ const movieSchema = new mongoose.Schema({
     },
   },
   trailerLink: {
-    type: String ,
+    type: String,
     required: true,
     validate: {
       validator: (value) => validator.isURL(value, { protocols: ['http', 'https'], require_tld: true, require_protocol: true }),
@@ -39,7 +39,7 @@ const movieSchema = new mongoose.Schema({
     },
   },
   thumbnail: {
-    type: String ,
+    type: String,
     required: true,
     validate: {
       validator: (value) => validator.isURL(value, { protocols: ['http', 'https'], require_tld: true, require_protocol: true }),
@@ -52,16 +52,15 @@ const movieSchema = new mongoose.Schema({
     required: true,
   },
   movieId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'MoviesExplorer',
+    type: String,
     required: true,
   },
   nameRU: {
-    type: String ,
+    type: String,
     required: true,
   },
   nameEN: {
-    type: String ,
+    type: String,
     required: true,
   },
 });

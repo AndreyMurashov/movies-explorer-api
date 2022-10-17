@@ -1,67 +1,69 @@
-// require('dotenv').config();
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-// const { celebrate, Joi, errors } = require('celebrate');
-// const auth = require('./middlewares/auth');
-// const userRouter = require('./routes/users');
-// const { login, createUser } = require('./controllers/users');
-// const cardRouter = require('./routes/cards');
-// const DefaultError = require('./errors/DefaultError');
-// const NotFoundError = require('./errors/NotFoundError');
-// const cors = require('./midlewares/cors');
-// const { requestLogger, errorLogger } = require('./midlewares/logger');
+const { celebrate, Joi, errors } = require('celebrate');
+const auth = require('./middlewares/auth');
+const userRouter = require('./routes/users');
+const { login, createUser } = require('./controllers/users');
+const movieRouter = require('./routes/movies');
+const NotFoundError = require('./errors/NotFoundError');
+const cors = require('./middlewares/cors');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const app = express();
-const { PORT = 3000 } = process.env;
+const { PORT = 3000, DB_ADDRESS = 'mongodb://localhost:27017/bitfilmsdb' } = process.env;
 
-// const absentisPage = (req, res, next) => {
-//   next(new NotFoundError('Страница не найдена'));
-// };
+const absentisPage = (req, res, next) => {
+  next(new NotFoundError('Страница не найдена'));
+};
 
 app.use(express.json());
-// app.use(cors);
+app.use(cors);
 
-// app.get('/crash-test', () => {
-//   setTimeout(() => {
-//     throw new Error('Сервер сейчас упадёт');
-//   }, 0);
-// });
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
 
-// app.use(requestLogger);
+app.use(requestLogger);
 
-// app.post('/signup', celebrate({
-//   body: Joi.object().keys({
-//     name: Joi.string().min(2).max(30),
-//     about: Joi.string().min(2).max(30),
-//     avatar: Joi.string()
-//     .regex(/^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/),
-//     email: Joi.string().required().email(),
-//     password: Joi.string().required(),
-//   }),
-// }), createUser);
-// app.post('/signin', celebrate({
-//   body: Joi.object().keys({
-//     email: Joi.string().required().email(),
-//     password: Joi.string().required(),
-//   }),
-// }), login);
-// app.use(auth);
-// app.use(userRouter);
-// app.use(cardRouter);
-// app.all('*', absentisPage);
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+  }),
+}), createUser);
 
-// app.use(errorLogger);
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+  }),
+}), login);
 
-// app.use(errors());
+app.use(auth);
+app.use(userRouter);
+app.use(movieRouter);
+app.all('*', absentisPage);
 
-// app.use((err, req, res, next) => {
-//   const { statusCode = 500, message } = err;
-//   res.status(statusCode).send({ message: statusCode === 500 ?
-// 'На сервере произошла ошибка' : message });
-// });
+app.use(errorLogger);
+
+app.use(errors());
+
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+  res.status(statusCode).send(
+    {
+      message: statusCode === 500
+        ? 'На сервере произошла ошибка' : message,
+    },
+  );
+});
 
 mongoose
-  .connect('mongodb://127.0.0.1:27017/mestodb', {
+  .connect(DB_ADDRESS, {
     useNewUrlParser: true,
   })
   .then(console.log('DB OK'))
