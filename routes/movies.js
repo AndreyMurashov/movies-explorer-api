@@ -1,6 +1,13 @@
 const movieRouter = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
+const { body } = require('express-validator');
 const movieController = require('../controllers/movies');
+
+const movValid = [
+  body('image').isURL(),
+  body('trailerLink').isURL(),
+  body('thumbnail').isURL(),
+];
 
 movieRouter.get('/movies', movieController.getMovies);
 
@@ -11,15 +18,14 @@ movieRouter.post('/movies', celebrate({
     duration: Joi.number().integer().required(),
     year: Joi.string().required().max(4),
     description: Joi.string().required(),
-    image: Joi.string().required().regex(/^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/),
-    trailerLink: Joi.string().required().regex(/^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/),
-    thumbnail: Joi.string().required().regex(/^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/),
-    owner: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
-    movieId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+    image: Joi.string().required(),
+    trailerLink: Joi.string().required(),
+    thumbnail: Joi.string().required(),
+    movieId: Joi.number().integer().required(),
     nameRU: Joi.string().required(),
     nameEN: Joi.string().required(),
   }),
-}), movieController.createMovie);
+}), movValid, movieController.createMovie);
 
 movieRouter.delete('/movies/:_id', celebrate({
   params: Joi.object().keys({

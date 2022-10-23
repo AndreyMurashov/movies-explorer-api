@@ -7,7 +7,6 @@ const BadRequestError = require('../errors/BadRequestError');
 const DefaultError = require('../errors/DefaultError');
 const AuthorizationError = require('../errors/AuthorizationError');
 const LoginError = require('../errors/LoginError');
-// const user = require('../models/user');
 
 // создаёт пользователя
 const createUser = (req, res, next) => {
@@ -18,7 +17,7 @@ const createUser = (req, res, next) => {
       password: hash,
       name: req.body.name,
     }))
-    .then((user) => res.status(200).send({
+    .then((user) => res.send({
       name: user.name,
       _id: user._id,
       email: user.email,
@@ -42,8 +41,8 @@ const login = (req, res, next) => {
       const token = jwt.sign({ _id: user._id }, `${NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key'}`, { expiresIn: '7d' });
       res.send({ token });
     })
-    .catch((err) => {
-      next(new LoginError('Ошибка авторизации'));
+    .catch(() => {
+      next(new LoginError('Неправильная почта или пароль'));
     });
 };
 
@@ -55,7 +54,7 @@ const getCurrentUser = (req, res, next) => {
       if (!user) {
         next(new NotFoundError('Пользователь не найден'));
       } else {
-        res.status(200).json(user);
+        res.json(user);
       }
     })
     .catch((err) => {
@@ -76,9 +75,12 @@ const updateUser = async (req, res, next) => {
       email,
     }, { new: true, runValidators: true }).orFail(() => new NotFoundError('Пользователь с указанным id не существует'))
       .then((user) => {
-        res.status(200).send(user);
+        res.send(user);
       });
   } catch (err) {
+    if (err.code === 11000) {
+      next(new AuthorizationError('Ошибка доступа'));
+    }
     if (err.name === 'CastError' || err.name === 'ValidationError') {
       next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
     } else {

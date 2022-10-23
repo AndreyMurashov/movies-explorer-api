@@ -1,13 +1,17 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const { celebrate, Joi, errors } = require('celebrate');
+const { errors } = require('celebrate');
+const helmet = require('helmet');
 const auth = require('./middlewares/auth');
-const userRouter = require('./routes/users');
-const { login, createUser } = require('./controllers/users');
-const movieRouter = require('./routes/movies');
+const mainErrors = require('./middlewares/mainErrors');
+
+// const userRouter = require('./routes/users');
+// const { login, createUser } = require('./controllers/users');
+// const movieRouter = require('./routes/movies');
 const NotFoundError = require('./errors/NotFoundError');
 const cors = require('./middlewares/cors');
+const limiter = require('./middlewares/limiter');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const app = express();
@@ -25,55 +29,27 @@ app.get('/crash-test', () => {
     throw new Error('Сервер сейчас упадёт');
   }, 0);
 });
-
+app.use(helmet());
 app.use(requestLogger);
+app.use(limiter);
 
-app.post('/signup', celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    email: Joi.string().required().email(),
-    password: Joi.string().required(),
-  }),
-}), createUser);
-
-app.post('/signin', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().required(),
-  }),
-}), login);
+app.use(require('./routes/login'));
 
 app.use(auth);
-app.use(userRouter);
-app.use(movieRouter);
+
+app.use(require('./routes/users'));
+app.use(require('./routes/movies'));
+
 app.all('*', absentisPage);
 
 app.use(errorLogger);
 
 app.use(errors());
-
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
-  res.status(statusCode).send(
-    {
-      message: statusCode === 500
-        ? 'На сервере произошла ошибка' : message,
-    },
-  );
-});
+app.use(mainErrors);
 
 mongoose
   .connect(DB_ADDRESS, {
     useNewUrlParser: true,
-  })
-  .then(console.log('DB OK'))
-  .catch((err) => {
-    console.log(err);
   });
 
-app.listen(PORT, (err) => {
-  if (err) {
-    console.log('Произошла ошибка при запуске сервера');
-  }
-  console.log(`Сервер запущен на ${PORT} порту`);
-});
+app.listen(PORT);
