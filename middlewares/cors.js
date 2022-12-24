@@ -1,7 +1,7 @@
 const allowedCors = [
   'http://localhost:3000',
-  'http://murashoff.nomoredomains.icu',
-  'https://murashoff.nomoredomains.icu',
+  'http://45.130.43.141',
+  'https://45.130.43.141',
 ];
 
 const cors = (req, res, next) => {
