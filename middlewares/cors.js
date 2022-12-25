@@ -2,6 +2,10 @@ const allowedCors = [
   'http://localhost:3000',
   'http://45.130.43.141',
   'https://45.130.43.141',
+  'http://avm-fond.store',
+  'https://avm-fond.store',
+  'http://www.avm-fond.store',
+  'https://www.avm-fond.store',
 ];
 
 const cors = (req, res, next) => {
