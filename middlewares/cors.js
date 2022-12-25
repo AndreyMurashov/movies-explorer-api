@@ -2,6 +2,8 @@ const allowedCors = [
   'http://localhost:3000',
   'http://45.130.43.141',
   'https://45.130.43.141',
+  'http://178.173.52.3',
+  'https://178.173.52.3',
   'http://avm-fond.store',
   'https://avm-fond.store',
   'http://www.avm-fond.store',
